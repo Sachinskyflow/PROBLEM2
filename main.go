@@ -42,6 +42,10 @@ func main() {
 	}
 	ch := make(chan int, numBuffChan)
 	var wg sync.WaitGroup
+	// producer(ch, numGenerated)
+	// go func() {
+	// 	producer(ch, numGenerated)
+	// }()
 	for i := 0; i < numConsumer; i++ {
 		wg.Add(1)
 		go func() {
@@ -49,6 +53,7 @@ func main() {
 			consumer(i+1, ch)
 		}()
 	}
+	// producer(ch, numGenerated)
 	go func() {
 		producer(ch, numGenerated)
 	}()
