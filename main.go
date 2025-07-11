@@ -2,27 +2,10 @@ package main
 
 import (
 	"fmt"
+	consumer "problem2/Consumer"
+	producer "problem2/Producer"
 	"sync"
 )
-
-func producer(ch chan int, numGenerated int) {
-	for i := 1; i <= numGenerated; i++ {
-		ch <- i
-		fmt.Printf("Produced number: %d\n", i)
-	}
-	close(ch)
-}
-
-func consumer(i int, ch chan int) {
-	for number := range ch {
-		ans := processItem(number)
-		fmt.Printf("Consumer %d consumed number %d, processed result: %d\n", i, number, ans)
-	}
-}
-
-func processItem(number int) int {
-	return number * number
-}
 
 func main() {
 	var (
@@ -44,13 +27,13 @@ func main() {
 	var wg sync.WaitGroup
 	for i := 0; i < numConsumer; i++ {
 		wg.Add(1)
-		go func() {
+		go func(i int) {
 			defer wg.Done()
-			consumer(i+1, ch)
-		}()
+			consumer.Consumer(i, ch)
+		}(i + 1)
 	}
 	go func() {
-		producer(ch, numGenerated)
+		producer.Producer(ch, numGenerated)
 	}()
 	wg.Wait()
 }
