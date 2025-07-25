@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package app;
+
+option go_package = "./proto";
+
+import "google/api/annotations.proto";
+
+service AppService {
+    rpc Insert(InsertUserRequest) returns (InsertUserResponse){
+        option (google.api.http) = {
+            post: "/v1/insert"
+            body: "*"
+        };
+    }
+
+    rpc Get(GetUserRequest) returns (GetUserResponse){
+        option (google.api.http) = {
+            get: "/v1/get/{roll_no}"
+        };
+    }
+}
+
+message InsertUserRequest {
+    int64 roll_no = 1;
+    string name = 2;
+    int64 physics =3;
+    int64 chemistry =4;
+    int64 biology =5;
+    int64 maths =6;
+    int64 english =7;
+}
+message InsertUserResponse {
+    string message = 1; 
+}
+message GetUserRequest {
+    int64 roll_no = 1;
+}
+message GetUserResponse { 
+    int64 roll_no = 1;
+    string name = 2;
+    int64 physics =3;
+    int64 chemistry =4;
+    int64 biology =5;
+    int64 maths =6;
+    int64 english =7;
+}
