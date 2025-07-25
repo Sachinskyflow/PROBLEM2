@@ -1,39 +1,29 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	consumer "problem2/Consumer"
-	producer "problem2/Producer"
-	"sync"
+	"os"
+
+	app "problem2/pkg/app"
+
+	aerospike "github.com/aerospike/aerospike-client-go/v8"
+)
+
+const (
+	host = "aerospike"
+	port = 3000
 )
 
 func main() {
-	var (
-		numConsumer  int
-		numBuffChan  int
-		numGenerated int
-	)
-	fmt.Print("Enter number of consumers: ")
-	fmt.Scan(&numConsumer)
-	fmt.Print("Enter number of buffered channels: ")
-	fmt.Scan(&numBuffChan)
-	fmt.Print("Enter number of generated integers: ")
-	fmt.Scan(&numGenerated)
-	if numConsumer <= 0 || numBuffChan <= 0 || numGenerated <= 0 {
-		fmt.Println("All numbers must be greater than zero.")
-		return
+	ctx := context.Background()
+	aero, err := aerospike.NewClient(host, port)
+	if err != nil {
+		fmt.Printf("Failed to create aerospike client: %v\n", err)
+		os.Exit(1)
 	}
-	ch := make(chan int, numBuffChan)
-	var wg sync.WaitGroup
-	for i := 0; i < numConsumer; i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			consumer.Consumer(i, ch)
-		}(i + 1)
+	defer aero.Close()
+	if err := app.Main(ctx, aero); err != nil {
+		fmt.Printf("App exited with error: %v\n", err)
 	}
-	go func() {
-		producer.Producer(ch, numGenerated)
-	}()
-	wg.Wait()
 }
