@@ -12,11 +12,25 @@ import (
 	aerospike "github.com/aerospike/aerospike-client-go/v8"
 )
 
+const (
+	host = "aerospike"
+	port = 3000
+)
+
 var grpcServiceEntity *grpcService
 var restServiceEntity *restService
+var aero *aerospike.Client
 
-func Main(ctx context.Context, aero *aerospike.Client) error {
-	err := start(ctx, aero)
+func Main() error {
+	ctx := context.Background()
+	var err error
+	aero, err = aerospike.NewClient(host, port)
+	if err != nil {
+		fmt.Printf("Failed to create aerospike client: %v\n", err)
+		return err
+	}
+	defer aero.Close()
+	err = start(ctx)
 	if err != nil {
 		fmt.Printf("Failed to start app: %v\n", err)
 		return err
@@ -35,7 +49,7 @@ func Main(ctx context.Context, aero *aerospike.Client) error {
 	return nil
 }
 
-func start(ctx context.Context, aero *aerospike.Client) error {
+func start(ctx context.Context) error {
 	grpcServiceEntity = NewGrpcService(ctx, aero)
 	go func() {
 		err := grpcServiceEntity.Start(ctx)
@@ -56,6 +70,7 @@ func start(ctx context.Context, aero *aerospike.Client) error {
 	}()
 	return nil
 }
+
 func stop(ctx context.Context) error {
 	wg := sync.WaitGroup{}
 	wg.Add(2)

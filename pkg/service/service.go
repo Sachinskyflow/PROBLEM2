@@ -9,19 +9,19 @@ import (
 )
 
 type RecordService struct {
-	aero *aerospike.Client
+	datastore *db.Datastore
+	aero      *aerospike.Client
 	proto.UnimplementedAppServiceServer
 }
 
 func NewRecordService(ctx context.Context, aero *aerospike.Client) *RecordService {
 	return &RecordService{
-		aero: aero,
+		datastore: db.NewDatastore(ctx, aero),
 	}
 }
 
 func (s *RecordService) Insert(ctx context.Context, req *proto.InsertUserRequest) (*proto.InsertUserResponse, error) {
-	datastore := db.NewDatastore(ctx, s.aero)
-	rec, err := datastore.Insert(ctx, req)
+	rec, err := s.datastore.Insert(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +29,7 @@ func (s *RecordService) Insert(ctx context.Context, req *proto.InsertUserRequest
 }
 
 func (s *RecordService) Get(ctx context.Context, req *proto.GetUserRequest) (*proto.GetUserResponse, error) {
-	datastore := db.NewDatastore(ctx, s.aero)
-	rec, err := datastore.Get(ctx, req)
+	rec, err := s.datastore.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
