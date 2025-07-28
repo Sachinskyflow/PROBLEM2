@@ -17,6 +17,17 @@ func NewDatastore(ctx context.Context, aero *aerospike.Client) *Datastore {
 	}
 }
 
+const (
+	namespace = "test"
+	set       = "record"
+	name      = "name"
+	physics   = "physics"
+	chemistry = "chemistry"
+	biology   = "biology"
+	maths     = "maths"
+	english   = "english"
+)
+
 func (d *Datastore) Insert(ctx context.Context, req *proto.InsertUserRequest) (*proto.InsertUserResponse, error) {
 	key, err := d.AeroKey(ctx, req.RollNo)
 	if err != nil {
@@ -48,7 +59,7 @@ func (d *Datastore) Get(ctx context.Context, req *proto.GetUserRequest) (*proto.
 }
 
 func (d *Datastore) AeroKey(ctx context.Context, roll_no int64) (*aerospike.Key, error) {
-	key, err := aerospike.NewKey("test", "record", roll_no)
+	key, err := aerospike.NewKey(namespace, set, roll_no)
 	if err != nil {
 		return nil, err
 	}
@@ -57,12 +68,12 @@ func (d *Datastore) AeroKey(ctx context.Context, roll_no int64) (*aerospike.Key,
 
 func (d *Datastore) AeroBin(ctx context.Context, req *proto.InsertUserRequest) ([]*aerospike.Bin, error) {
 	bins := make([]*aerospike.Bin, 0)
-	bins = append(bins, aerospike.NewBin("name", req.Name))
-	bins = append(bins, aerospike.NewBin("physics", req.Physics))
-	bins = append(bins, aerospike.NewBin("chemistry", req.Chemistry))
-	bins = append(bins, aerospike.NewBin("biology", req.Biology))
-	bins = append(bins, aerospike.NewBin("maths", req.Maths))
-	bins = append(bins, aerospike.NewBin("english", req.English))
+	bins = append(bins, aerospike.NewBin(name, req.Name))
+	bins = append(bins, aerospike.NewBin(physics, req.Physics))
+	bins = append(bins, aerospike.NewBin(chemistry, req.Chemistry))
+	bins = append(bins, aerospike.NewBin(biology, req.Biology))
+	bins = append(bins, aerospike.NewBin(maths, req.Maths))
+	bins = append(bins, aerospike.NewBin(english, req.English))
 
 	return bins, nil
 }
@@ -76,18 +87,18 @@ func (d *Datastore) AeroPut(ctx context.Context, key *aerospike.Key, bins []*aer
 }
 
 func (d *Datastore) AeroGet(ctx context.Context, key *aerospike.Key, roll_no int64) (*proto.GetUserResponse, error) {
-	rec, err := d.aero.Get(nil, key, "name", "physics", "chemistry", "biology", "maths", "english")
+	rec, err := d.aero.Get(nil, key, name, physics, chemistry, biology, maths, english)
 	if err != nil {
 		return nil, err
 	}
 
 	return &proto.GetUserResponse{
 		RollNo:    roll_no,
-		Name:      rec.Bins["name"].(string),
-		Physics:   int64(rec.Bins["physics"].(int)),
-		Chemistry: int64(rec.Bins["chemistry"].(int)),
-		Biology:   int64(rec.Bins["biology"].(int)),
-		Maths:     int64(rec.Bins["maths"].(int)),
-		English:   int64(rec.Bins["english"].(int)),
+		Name:      rec.Bins[name].(string),
+		Physics:   int64(rec.Bins[physics].(int)),
+		Chemistry: int64(rec.Bins[chemistry].(int)),
+		Biology:   int64(rec.Bins[biology].(int)),
+		Maths:     int64(rec.Bins[maths].(int)),
+		English:   int64(rec.Bins[english].(int)),
 	}, nil
 }
