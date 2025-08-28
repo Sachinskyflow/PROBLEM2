@@ -30,7 +30,7 @@ func main() {
 	}
 	insert := aerospike.BinMap{
 		"name": "Sachin",
-		"Page": 25,
+		"Page": 26,
 	}
 	insert1 := aerospike.BinMap{
 		"name": "Sahil",
